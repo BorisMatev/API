@@ -1,4 +1,4 @@
-﻿namespace BonFireAPI.Models.RequestDTOs
+﻿namespace BonFireAPI.Models.RequestDTOs.Movie
 {
     public class RequestMovie
     {

@@ -42,7 +42,8 @@ namespace Common
                     Username = "admin",
                     Password = "adminpass",
                     Profile_Photo = "",
-                    Email = "admin@admin.com"
+                    Email = "admin@admin.com",
+                    Role = "Admin"
                 });
 
             #endregion

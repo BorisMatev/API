@@ -2,8 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Common.Services;
 using Common.Entities;
-using BonFireAPI.Models.RequestDTOs;
 using BonFireAPI.Models.ResponseDTOs.Movies;
+using BonFireAPI.Models.RequestDTOs.Movie;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BonFireAPI.Controllers
 {
@@ -12,8 +13,10 @@ namespace BonFireAPI.Controllers
     public class MovieController : ControllerBase
     {
         MovieService service = new MovieService();
+
+        [Authorize(Roles = "Admin")]
         [HttpGet]
-        public ActionResult<List<ResponseMovies>> GetAll()
+        public IActionResult GetAll()
         {
             var movies = service.GetAll();
 
