@@ -10,5 +10,7 @@ namespace Common.Entities
     {
         public string Name { get; set; }
         public string Photo { get; set; }
+
+        public virtual List<MovieActor> Movies { get; set; } 
     }
 }

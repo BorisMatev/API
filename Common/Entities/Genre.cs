@@ -9,5 +9,6 @@ namespace Common.Entities
     public class Genre : BaseEntity
     {
         public string Name{ get; set; }
+        public virtual List<MovieGenre> Movies { get; set; }
     }
 }

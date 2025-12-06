@@ -12,5 +12,8 @@ namespace Common.Entities
         public string Email { get; set; }
         public string Password { get; set; }
         public string Profile_Photo { get; set; }
+
+        public virtual List<Review> Reviews { get; set; }
+        public virtual List<Favorite> FavoriteMovies { get; set; }
     }
 }

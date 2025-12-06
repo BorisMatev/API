@@ -10,5 +10,6 @@ namespace Common.Entities
     {
         public string Name { get; set; }
         public string Biography { get; set; }
+        public virtual List<Movie> Movies { get; set; }
     }
 }
