@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Common.Entities
 {
-    public class Favorite
+    public class Favorite : BaseEntity
     {
         public int Count { get; set; }
 
