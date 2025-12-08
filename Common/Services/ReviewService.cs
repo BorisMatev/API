@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Common.Services
 {
-    internal class ReviewService : BaseService<Review>
+    public class ReviewService : BaseService<Review>
     {
     }
 }

@@ -1,10 +1,17 @@
-﻿namespace BonFireAPI.Models.ResponseDTOs.Movies
+﻿using Common.Entities;
+
+namespace BonFireAPI.Models.ResponseDTOs.Movies
 {
     public class ResponseMovies
     {
         public string Title { get; set; }
-        public string PhotoPath { get; set; }
+        public string CoverPath { get; set; }
         public string Release_Date { get; set; }
         public double Rating { get; set; }
+
+        public string DirectorName { get; set; }
+
+        public List<string> Genres { get; set; }
+        public List<string> Actors { get; set; }
     }
 }

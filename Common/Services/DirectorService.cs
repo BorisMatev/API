@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Common.Services
 {
-    internal class DirectorService : BaseService<Director>
+    public class DirectorService : BaseService<Director>
     {
     }
 }

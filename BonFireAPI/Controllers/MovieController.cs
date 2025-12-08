@@ -12,36 +12,44 @@ namespace BonFireAPI.Controllers
     [ApiController]
     public class MovieController : ControllerBase
     {
-        MovieService service = new MovieService();
+        private MovieService service = new MovieService();
 
-        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetAll()
         {
-            var movies = service.GetAll();
 
             string baseUrl = $"{Request.Scheme}://{Request.Host}";
 
-            var result = movies.Select(m => new ResponseMovies
-            {
-                Title = m.Title,
-                Release_Date = m.Release_Date,
-                Rating = m.Rating,
-                PhotoPath = $"{baseUrl}/Assets/{Path.GetFileName(m.CoverPath)}"
-            }).ToList();
+            var result = service.GetAll()
+                .Select(m => new ResponseMovies
+                {
+                     Title = m.Title,
+                     Release_Date = m.Release_Date,
+                     Rating = m.Rating,
+                     CoverPath = $"{baseUrl}/{m.CoverPath}",
+                     DirectorName = m.Director.Name,
+                     Genres = m.Genres.Select(x => x.Genre.Name).ToList(),
+                     Actors = m.Actors.Select(x => x.Actor.Name).ToList()
+                }).ToList();
 
             return Ok(result);
         }
         [HttpPost]
         public IActionResult CreateMovie([FromForm] RequestMovie reques)
         {
+            DirectorService ds = new DirectorService();
+            var director = ds.GetAll().FirstOrDefault(d => d.Name == reques.DirectorName);
 
-            var movie = new Movie 
+            if (director == null) 
+                return BadRequest("Director not found!");
+
+            var movie = new Movie
             {
                 Title = reques.Title,
                 Rating = reques.Rating,
                 Release_Date = reques.Release_Date,
-                CoverPath = ""
+                CoverPath = "",
+                DirectorId = director.Id
             };
 
             var created = service.CreateMovie(movie, reques.Photo);
