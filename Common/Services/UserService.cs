@@ -10,7 +10,7 @@ namespace Common.Services
 {
     public class UserService : BaseService<User>
     {
-        public User CreateActor(User user, IFormFile photo)
+        public User CreateUser(User user, IFormFile photo)
         {
             PhotoService service = new PhotoService();
 

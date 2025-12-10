@@ -66,12 +66,14 @@ builder.Services.AddAuthorization(options =>
 var app = builder.Build();
 
 // Enable serving static files
-app.UseStaticFiles(new StaticFileOptions
+/*app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
         Path.Combine(builder.Environment.ContentRootPath, "../Common/Assets")),
     RequestPath = "/Assets"
-});
+});*/
+
+app.UseStaticFiles();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

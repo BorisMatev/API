@@ -34,7 +34,7 @@ namespace Common.Services
                 }
 
             }
-            return $"Assets/{fileName}";
+            return fileName;
         }
     }
 }

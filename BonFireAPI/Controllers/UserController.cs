@@ -21,15 +21,13 @@ namespace BonFireAPI.Controllers
         public IActionResult GetAll() 
         {
 
-            string baseUrl = $"{Request.Scheme}://{Request.Host}";
-
             var result = service.GetAll()
                 .Select(u => new UserResponse
                 {
                     Username = u.Username,
                     Email = u.Email,
                     Role = u.Role,
-                    Profile_Photo = $"{baseUrl}/{u.Profile_Photo}",
+                    Profile_Photo = u.Profile_Photo,
                     FavoriteMovies = u.FavoriteMovies.Select(x => x.Movie.Title).ToList(),
                     Reviews = u.Reviews.Select(x => x.Movie.Title).ToList(),
                 }).ToList();
@@ -49,7 +47,7 @@ namespace BonFireAPI.Controllers
                 Role = "User"
             };
 
-            service.CreateActor(user, req.Profile_Photo);
+            service.CreateUser(user, req.Profile_Photo);
 
             return Ok();
         }
@@ -68,7 +66,7 @@ namespace BonFireAPI.Controllers
             user.Email = req.Email;
             user.Password = req.Password;
 
-            service.CreateActor(user, req.Profile_Photo);
+            service.CreateUser(user, req.Profile_Photo);
 
             return Ok();
         }
