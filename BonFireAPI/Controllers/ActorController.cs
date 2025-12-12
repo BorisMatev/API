@@ -12,19 +12,18 @@ namespace BonFireAPI.Controllers
     public class ActorController : ControllerBase
     {
         private ActorService service = new ActorService();
-
+        private PhotoService photoService = new PhotoService();
 
         [HttpGet]
         public IActionResult GetAll()
         {
-            string baseUrl = $"{Request.Scheme}://{Request.Host}";
 
             var response = service.GetAll()
                 .Select(x => new Actor 
                 {
                     Id = x.Id,
                     Name = x.Name,
-                    Photo = $"{baseUrl}/{x.Photo}"
+                    Photo = x.Photo
                 });
 
             return Ok(response);
@@ -34,16 +33,12 @@ namespace BonFireAPI.Controllers
         [Route("{id}")]
         public IActionResult GetById([FromRoute] int id)
         {
-            string baseUrl = $"{Request.Scheme}://{Request.Host}";
-
             var response = service.GetById(id);
 
             if (response == null)
             {
                 return BadRequest("Not found");
             }
-
-            response.Photo = $"{baseUrl}/{response.Photo}";
 
             return Ok(response);
         }
@@ -53,10 +48,9 @@ namespace BonFireAPI.Controllers
         {
             var actor = new Actor()
             {
-                Name = req.Name
+                Name = req.Name,
+                Photo = photoService.GetPhotoName(req.Photo)
             };
-
-            service.CreateActor(actor, req.Photo);
 
             return Ok();
         }
@@ -72,7 +66,7 @@ namespace BonFireAPI.Controllers
 
             actor.Name = req.Name;
 
-            service.CreateActor(actor, req.Photo);
+            photoService.GetPhotoName(req.Photo);
 
             return Ok();
         }

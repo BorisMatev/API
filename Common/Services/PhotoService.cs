@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Common.Services
 {
-    internal class PhotoService
+    public class PhotoService
     {
         private readonly string imageFolder = Path.Combine(Directory.GetCurrentDirectory(), "..", "Common", "Assets");
 
@@ -17,7 +17,7 @@ namespace Common.Services
                 Directory.CreateDirectory(imageFolder);
         }
 
-        public string SavePhoto(IFormFile photo)
+        public string GetPhotoName(IFormFile photo)
         {
 
             string fileName = "";
@@ -35,6 +35,16 @@ namespace Common.Services
 
             }
             return fileName;
+        }
+
+        public void DeletePhoto(string fileName)
+        {
+            string filePath = Path.Combine(imageFolder, fileName);
+
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
         }
     }
 }

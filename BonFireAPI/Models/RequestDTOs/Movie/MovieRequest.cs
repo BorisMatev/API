@@ -1,6 +1,6 @@
 ﻿namespace BonFireAPI.Models.RequestDTOs.Movie
 {
-    public class RequestMovie
+    public class MovieRequest
     {
         public string DirectorName { get; set; }
         public string Title { get; set; }

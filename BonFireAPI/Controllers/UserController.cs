@@ -16,6 +16,7 @@ namespace BonFireAPI.Controllers
     public class UserController : ControllerBase
     {
         UserService service = new UserService();
+        PhotoService photoService = new PhotoService();
 
         [HttpGet]
         public IActionResult GetAll() 
@@ -32,7 +33,21 @@ namespace BonFireAPI.Controllers
                     Reviews = u.Reviews.Select(x => x.Movie.Title).ToList(),
                 }).ToList();
 
-            return Ok(service.GetAll());
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        public IActionResult GetById([FromRoute] int id) 
+        {
+            var user = service.GetById(id);
+
+            if (user == null)
+            {
+                return BadRequest("Not found");
+            }
+
+            return Ok(user);
         }
 
         [HttpPost]
@@ -44,29 +59,37 @@ namespace BonFireAPI.Controllers
                 Email = req.Email,
                 Username = req.Username,
                 Password = req.Password,
+                Profile_Photo = photoService.GetPhotoName(req.Profile_Photo),
                 Role = "User"
             };
 
-            service.CreateUser(user, req.Profile_Photo);
+            service.Save(user);
 
             return Ok();
         }
 
         [HttpPut]
         [Route("{id}")]
-        public IActionResult Update([FromForm] UserRequest req, [FromRoute] int id)
+        public IActionResult Update([FromForm] UserUpdateRequest req, [FromRoute] int id)
         {
             var user = service.GetById(id);
 
             if (user == null)
                 return BadRequest("Not found");
 
-            user.Username = req.Username;
-            user.Role = req.Role;
-            user.Email = req.Email;
-            user.Password = req.Password;
+            if (!string.IsNullOrEmpty(req.Username))
+                user.Username = req.Username;
 
-            service.CreateUser(user, req.Profile_Photo);
+            if (!string.IsNullOrEmpty(req.Email))
+                user.Email = req.Email;
+
+            if (!string.IsNullOrEmpty(req.Password))
+                user.Password = req.Password;
+
+            if (req.Profile_Photo != null)
+                user.Profile_Photo = photoService.GetPhotoName(req.Profile_Photo);
+
+            service.Save(user);
 
             return Ok();
         }
@@ -88,6 +111,7 @@ namespace BonFireAPI.Controllers
                 return BadRequest();
             }
 
+            photoService.DeletePhoto(user.Profile_Photo);
             service.Delete(user);
 
             return Ok();

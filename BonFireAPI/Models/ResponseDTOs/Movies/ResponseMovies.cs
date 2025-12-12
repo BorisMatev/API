@@ -4,6 +4,7 @@ namespace BonFireAPI.Models.ResponseDTOs.Movies
 {
     public class ResponseMovies
     {
+        public int Id { get; set; }
         public string Title { get; set; }
         public string CoverPath { get; set; }
         public string Release_Date { get; set; }

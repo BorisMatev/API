@@ -2,7 +2,7 @@
 
 namespace BonFireAPI.Models.RequestDTOs.Movie
 {
-    public class MovieValidator: AbstractValidator<RequestMovie>
+    public class MovieValidator: AbstractValidator<MovieRequest>
     {
         public MovieValidator() 
         {
