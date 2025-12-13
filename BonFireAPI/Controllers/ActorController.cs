@@ -1,4 +1,5 @@
 ﻿using BonFireAPI.Models.RequestDTOs.Actor;
+using BonFireAPI.Models.ResponseDTOs.Actor;
 using Common.Entities;
 using Common.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -9,80 +10,29 @@ namespace BonFireAPI.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles = "Admin")]
-    public class ActorController : ControllerBase
+    public class ActorController : BaseController<Actor,ActorService, ActorRequest, ActorResponse>
     {
-        private ActorService service = new ActorService();
         private PhotoService photoService = new PhotoService();
 
-        [HttpGet]
-        public IActionResult GetAll()
+        protected override void PopulateEntity(Actor forUpdate, ActorRequest model, out string error)
         {
-
-            var response = service.GetAll()
-                .Select(x => new Actor 
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    Photo = x.Photo
-                });
-
-            return Ok(response);
+            error = null;
+            forUpdate.Name = model.Name;
+            forUpdate.Photo = photoService.GetPhotoName(model.Photo);
+        }
+        protected override void PopulateResponseEntity(ActorResponse forUpdate, Actor model, out string error)
+        {
+            error = null;
+            forUpdate.Id = model.Id;
+            forUpdate.Name = model.Name;
+            forUpdate.Photo = model.Photo;
+            forUpdate.Movies = model.Movies.Select(x => x.Movie.Title).ToList();
         }
 
-        [HttpGet]
-        [Route("{id}")]
-        public IActionResult GetById([FromRoute] int id)
+        protected override void OnDelete(Actor entity,out string error)
         {
-            var response = service.GetById(id);
-
-            if (response == null)
-            {
-                return BadRequest("Not found");
-            }
-
-            return Ok(response);
-        }
-
-        [HttpPost]
-        public IActionResult Create([FromForm] ActorRequest req)
-        {
-            var actor = new Actor()
-            {
-                Name = req.Name,
-                Photo = photoService.GetPhotoName(req.Photo)
-            };
-
-            return Ok();
-        }
-
-        [HttpPut]
-        [Route("{id}")]
-        public IActionResult Update([FromForm] ActorRequest req, [FromRoute] int id)
-        {
-            var actor = service.GetById(id);
-
-            if (actor == null)
-                return BadRequest("Not found");
-
-            actor.Name = req.Name;
-
-            photoService.GetPhotoName(req.Photo);
-
-            return Ok();
-        }
-
-        [HttpDelete]
-        [Route("{id}")]
-        public IActionResult Delete([FromRoute] int id)
-        {
-            var actor = service.GetById(id);
-
-            if (actor == null)
-                return BadRequest("Not found");
-
-            service.Delete(actor);
-
-            return Ok();
+            error = null;
+            photoService.DeletePhoto(entity.Photo);
         }
     }
 }

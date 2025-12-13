@@ -2,9 +2,9 @@
 
 namespace BonFireAPI.Models.RequestDTOs.Director
 {
-    public class ActorValidator : AbstractValidator<ActorRequest>
+    public class DirectorValidator : AbstractValidator<DirectorRequest>
     {
-        public ActorValidator()
+        public DirectorValidator()
         {
             RuleFor(d => d.Name)
                 .NotEmpty().WithMessage("Name is required");

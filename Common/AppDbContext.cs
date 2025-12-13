@@ -124,7 +124,7 @@ namespace Common
             modelBuilder.Entity<MovieGenre>()
                 .HasOne(mg => mg.Genre)
                 .WithMany(mg => mg.Movies)
-                .HasForeignKey(mg => mg.MovieId)
+                .HasForeignKey(mg => mg.GenreId)
                 .OnDelete(DeleteBehavior.Restrict);
             #endregion
         }

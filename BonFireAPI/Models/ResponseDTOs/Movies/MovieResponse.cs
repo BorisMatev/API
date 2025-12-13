@@ -2,7 +2,7 @@
 
 namespace BonFireAPI.Models.ResponseDTOs.Movies
 {
-    public class ResponseMovies
+    public class MovieResponse
     {
         public int Id { get; set; }
         public string Title { get; set; }

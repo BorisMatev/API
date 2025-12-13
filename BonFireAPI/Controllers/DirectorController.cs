@@ -4,81 +4,28 @@ using Common.Services;
 using BonFireAPI.Models.RequestDTOs.Director;
 using Common.Entities;
 using Microsoft.AspNetCore.Authorization;
+using BonFireAPI.Models.ResponseDTOs.Director;
 
 namespace BonFireAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
-    public class DirectorController : ControllerBase
+    /*[Authorize(Roles = "Admin")]*/
+    public class DirectorController : BaseController<Director,DirectorService, DirectorRequest, DirectorResponse>
     {
-        private DirectorService service = new DirectorService();
-
-        [HttpGet]
-        public IActionResult GetAll()
+        protected override void PopulateEntity(Director forUpdate, DirectorRequest model, out string error)
         {
-            var response = service.GetAll();
-            return Ok(response);
+            error = null;
+            forUpdate.Name = model.Name;
+            forUpdate.Biography = model.Biography;
         }
-
-        [HttpGet]
-        [Route("{id}")]
-        public IActionResult GetById([FromRoute] int id) 
+        protected override void PopulateResponseEntity(DirectorResponse forUpdate, Director model, out string error)
         {
-            var response = service.GetById(id);
-
-            if (response == null)
-            {
-                return BadRequest("Not found");
-            }
-
-            return Ok(response);
-        }
-
-        [HttpPost]
-        public IActionResult Create(ActorRequest req) 
-        {
-            var director = new Director()
-            {
-                Name = req.Name,
-                Biography = req.Biography,
-                Movies = new List<Movie>()
-            };
-
-            service.Save(director);
-
-            return Ok();
-        }
-
-        [HttpPut]
-        [Route("{id}")]
-        public IActionResult Update(ActorRequest req, [FromRoute] int id)
-        {
-            var director = service.GetById(id);
-
-            if (director == null)
-                return BadRequest("Not found");
-
-            director.Name = req.Name;
-            director.Biography = req.Biography;
-
-            service.Save(director);
-
-            return Ok();
-        }
-
-        [HttpDelete]
-        [Route("{id}")]
-        public IActionResult Delete([FromRoute] int id)
-        {
-            var director = service.GetById(id);
-
-            if (director == null)
-                return BadRequest("Not found");
-
-            service.Delete(director);
-
-            return Ok();
+            error = null;
+            forUpdate.Id = model.Id;
+            forUpdate.Name = model.Name;
+            forUpdate.Biography = model.Biography;
+            forUpdate.Movies = model.Movies.Select(x=> x.Title).ToList();
         }
     }
 }

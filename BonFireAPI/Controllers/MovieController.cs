@@ -10,88 +10,62 @@ namespace BonFireAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MovieController : ControllerBase
+    public class MovieController : BaseController<Movie, MovieService, MovieRequest, MovieResponse>
     {
-        private MovieService service = new MovieService();
-
-        [HttpGet]
-        public IActionResult GetAll()
+        private PhotoService photoService = new PhotoService();
+        protected override void PopulateEntity(Movie forUpdate, MovieRequest model, out string error)
         {
-            var result = service.GetAll()
-                .Select(m => new ResponseMovies
-                {
-                    Id = m.Id,
-                     Title = m.Title,
-                     Release_Date = m.Release_Date,
-                     Rating = m.Rating,
-                     CoverPath = m.CoverPath,
-                     DirectorName = m.Director.Name,
-                     Genres = m.Genres.Select(x => x.Genre.Name).ToList(),
-                     Actors = m.Actors.Select(x => x.Actor.Name).ToList()
-                }).ToList();
+            error = null;
 
-            return Ok(result);
-        }
-        [HttpPost]
-        public IActionResult CreateMovie([FromForm] MovieRequest request)
-        {
             DirectorService ds = new DirectorService();
-            var director = ds.GetAll().FirstOrDefault(d => d.Name == request.DirectorName);
+            var director = ds.GetAll().FirstOrDefault(d => d.Name == model.DirectorName);
 
-            PhotoService ps = new PhotoService();
 
-            if (director == null) 
-                return BadRequest("Director not found!");
-
-            var movie = new Movie
+            if (director == null)
             {
-                Title = request.Title,
-                Rating = request.Rating,
-                Release_Date = request.Release_Date,
-                CoverPath = ps.GetPhotoName(request.Photo),
-                DirectorId = director.Id
-            };
-
-            service.Save(movie);
-
-            return Ok();
-        }
-
-        [HttpPut]
-        [Route("{id}")]
-        public IActionResult Update([FromForm] MovieRequest req, [FromRoute] int id)
-        {
-            var movie = service.GetById(id);
-
-            if (movie == null)
-                return BadRequest("Not found");
-
-            movie.Title = req.Title;
-            movie.Rating = req.Rating;
-            movie.Release_Date = req.Release_Date;
-
-            if (req.Photo != null)
-            {
-                PhotoService ps = new PhotoService();
-
-                ps.DeletePhoto(movie.CoverPath);
-
-                movie.CoverPath = ps.GetPhotoName(req.Photo);
+                error = "Director not found!";
+                return;
             }
 
-            service.Save(movie);
+            if (forUpdate.CoverPath != null)
+            {
+                photoService.DeletePhoto(forUpdate.CoverPath);
+            }
 
-            return Ok();
+            forUpdate.CoverPath = photoService.GetPhotoName(model.Photo);
+            forUpdate.Title = model.Title;
+            forUpdate.Rating = model.Rating;
+            forUpdate.Release_Date = model.Release_Date;
+            forUpdate.DirectorId = director.Id;
+        }
+
+        protected override void PopulateResponseEntity(MovieResponse forUpdate, Movie model, out string error)
+        {
+            error = null;
+            forUpdate.Id = model.Id;
+            forUpdate.Title = model.Title;
+            forUpdate.Release_Date = model.Release_Date;
+            forUpdate.Rating = model.Rating;
+            forUpdate.CoverPath = model.CoverPath;
+            forUpdate.DirectorName = model.Director.Name;
+            forUpdate.Genres = model.Genres.Select(x => x.Genre.Name).ToList();
+            forUpdate.Actors = model.Actors.Select(x => x.Actor.Name).ToList();
+        }
+
+        protected override void OnDelete(Movie entity, out string error)
+        { 
+            error = null;
+            photoService.DeletePhoto(entity.CoverPath);
         }
 
         [HttpGet]
         [Route("add-actor/{movieId}/{actorId}")]
         public IActionResult AddActor([FromRoute]int movieId, [FromRoute] int actorId) 
         {
-            MovieService ms = new MovieService();
+            MovieService movieService = new MovieService();
             ActorService actorService = new ActorService();
 
-            var movie = ms.GetById(movieId);
+            var movie = movieService.GetById(movieId);
             var actor = actorService.GetById(actorId);
 
             if (movie == null || actor == null) 
@@ -104,16 +78,13 @@ namespace BonFireAPI.Controllers
                 return BadRequest("Actor already added to this movie.");
             }
 
-
-
             movie.Actors.Add(new MovieActor
             {
                 MovieId = movie.Id,
                 ActorId = actor.Id
             });
 
-            ms.Save(movie);
-
+            movieService.Save(movie);
             return Ok();
         }
 
@@ -121,10 +92,10 @@ namespace BonFireAPI.Controllers
         [Route("remove-actor/{movieId}/{actorId}")]
         public IActionResult RemoveActor([FromRoute] int movieId, [FromRoute] int actorId)
         {
-            MovieService ms = new MovieService();
+            MovieService movieService = new MovieService();
             ActorService actorService = new ActorService();
 
-            var movie = ms.GetById(movieId);
+            var movie = movieService.GetById(movieId);
             var actor = actorService.GetById(actorId);
 
             if (movie == null || actor == null)
@@ -140,8 +111,63 @@ namespace BonFireAPI.Controllers
             }
 
             movie.Actors.Remove(movieActor);
-            ms.Save(movie);
+            movieService.Save(movie);
 
+            return Ok();
+        }
+
+        [HttpGet]
+        [Route("add-genre/{movieId}/{genreId}")]
+        public IActionResult AddGenre([FromRoute]int movieId, [FromRoute]int genreId) 
+        {
+            MovieService movieService = new MovieService();
+            GenreService genreService = new GenreService();
+
+            var movie = movieService.GetById(movieId);
+            var genre = genreService.GetById(genreId);
+            if (movie == null || genre == null)
+            {
+                return BadRequest("Not found");
+            }
+
+            if (movie.Genres.Any(m => m.GenreId == genre.Id))
+            {
+                return BadRequest("Genre already added to this movie.");
+            }
+
+            movie.Genres.Add(new MovieGenre 
+            {
+                GenreId = genre.Id,
+                MovieId = movie.Id
+            });
+
+            movieService.Save(movie);
+            return Ok();
+        }
+
+        [HttpGet]
+        [Route("remove-genre/{movieId}/{genreId}")]
+        public IActionResult RemoveGenre([FromRoute] int movieId, [FromRoute] int genreId)
+        {
+            MovieService movieService = new MovieService();
+            GenreService genreService = new GenreService();
+
+            var movie = movieService.GetById(movieId);
+            var genre = genreService.GetById(genreId);
+            if (movie == null || genre == null)
+            {
+                return BadRequest("Not found");
+            }
+
+            var movieGenre = movie.Genres.FirstOrDefault(m => m.GenreId == genre.Id);
+
+            if (movieGenre == null)
+            {
+                return BadRequest("Actor is not added to this movie.");
+            }
+
+            movie.Genres.Remove(movieGenre);
+            movieService.Save(movie);
             return Ok();
         }
 
