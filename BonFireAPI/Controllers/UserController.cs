@@ -60,5 +60,68 @@ namespace BonFireAPI.Controllers
         {
             return base.Create(request);
         }
+
+
+        [HttpGet]
+        [Route("add-to-favorite/{movieId}")]
+        public IActionResult AddToFavorite([FromRoute] int movieId) 
+        {
+            MovieService movieService = new MovieService();
+
+            var loggedUserId = int.Parse(User.FindFirst("loggedUserId")?.Value);
+
+            var user = service.GetById(loggedUserId);
+            var movie = movieService.GetById(movieId);
+
+            if (user == null || movie == null)
+            {
+                return BadRequest("Not found");
+            }
+
+            if (user.FavoriteMovies.Any(m => m.MovieId == movie.Id))
+            {
+                return BadRequest("Movie is already in favorite movies!");
+            }
+
+            user.FavoriteMovies.Add(new Favorite 
+            {
+                MovieId = movie.Id,
+                UserId = user.Id,
+            });
+
+            service.Save(user);
+
+            return Ok();
+        }
+
+        [HttpGet]
+        [Route("remove-from-favorite/{movieId}")]
+        public IActionResult RemoveFromFavorite([FromRoute] int movieId)
+        {
+            MovieService movieService = new MovieService();
+
+            var loggedUserId = int.Parse(User.FindFirst("loggedUserId")?.Value);
+
+            var user = service.GetById(loggedUserId);
+            var movie = movieService.GetById(movieId);
+
+            if (user == null || movie == null)
+            {
+                return BadRequest("Not found");
+            }
+
+            var favorite = user.FavoriteMovies.FirstOrDefault(m => m.MovieId == movie.Id);
+
+            if (favorite == null)
+            {
+                return BadRequest("Movie is not added in favorite movies!");
+            }
+
+            user.FavoriteMovies.Remove(favorite);
+
+            service.Save(user);
+
+            return Ok();
+        }
     }
 }
