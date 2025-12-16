@@ -10,7 +10,7 @@ namespace BonFireAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    /*[Authorize(Roles = "Admin")]*/
+    [Authorize(Roles = "Admin")]
     public class DirectorController : BaseController<Director,DirectorService, DirectorRequest, DirectorResponse>
     {
         protected override void PopulateEntity(Director forUpdate, DirectorRequest model, out string error)

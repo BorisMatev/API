@@ -8,8 +8,6 @@ namespace Common.Entities
 {
     public class Favorite : BaseEntity
     {
-        public int Count { get; set; }
-
         public int MovieId { get; set; }
         public int UserId { get; set; }
 

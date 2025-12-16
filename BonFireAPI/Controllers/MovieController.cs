@@ -34,7 +34,6 @@ namespace BonFireAPI.Controllers
 
             forUpdate.CoverPath = photoService.GetPhotoName(model.Photo);
             forUpdate.Title = model.Title;
-            forUpdate.Rating = model.Rating;
             forUpdate.Release_Date = model.Release_Date;
             forUpdate.DirectorId = director.Id;
         }

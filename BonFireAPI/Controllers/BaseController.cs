@@ -68,6 +68,11 @@ namespace BonFireAPI.Controllers
 
             PopulateEntity(entity, req, out error);
 
+            if (error != null)
+            {
+                return BadRequest(error);
+            }
+
             service.Save(entity);
 
             return Ok();
