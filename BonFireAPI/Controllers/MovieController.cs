@@ -10,6 +10,7 @@ namespace BonFireAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class MovieController : BaseController<Movie, MovieService, MovieRequest, MovieResponse>
     {
         private PhotoService photoService = new PhotoService();

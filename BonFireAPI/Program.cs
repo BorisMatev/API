@@ -8,8 +8,6 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers()
                             .AddJsonOptions(options =>
                             {
@@ -63,15 +61,18 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("User", policy => policy.RequireRole("User"));
 });
 
-var app = builder.Build();
-
-// Enable serving static files
-/*app.UseStaticFiles(new StaticFileOptions
+builder.Services.AddCors(options =>
 {
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(builder.Environment.ContentRootPath, "../Common/Assets")),
-    RequestPath = "/Assets"
-});*/
+    options.AddDefaultPolicy(policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+var app = builder.Build();
 
 app.UseStaticFiles();
 
@@ -82,7 +83,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 

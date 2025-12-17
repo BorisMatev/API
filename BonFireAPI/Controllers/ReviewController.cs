@@ -46,8 +46,5 @@ namespace BonFireAPI.Controllers
             forUpdate.Rating = model.Rating;
             forUpdate.Comment = model.Comment;
         }
-
-        [Authorize(Roles = ["User", "Admin"])]
-        public override IActionResult GetAll() => base.GetAll();
     }
 }
