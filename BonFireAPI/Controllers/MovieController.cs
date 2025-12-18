@@ -5,13 +5,15 @@ using Common.Entities;
 using BonFireAPI.Models.ResponseDTOs.Movies;
 using BonFireAPI.Models.RequestDTOs.Movie;
 using Microsoft.AspNetCore.Authorization;
+using System.Linq.Expressions;
+using System.Linq;
 
 namespace BonFireAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class MovieController : BaseController<Movie, MovieService, MovieRequest, MovieResponse>
+    public class MovieController : BaseController<Movie, MovieService, MovieRequest, MovieResponse,MovieGetRequest,MovieGetResponse>
     {
         private PhotoService photoService = new PhotoService();
         protected override void PopulateEntity(Movie forUpdate, MovieRequest model, out string error)
@@ -50,6 +52,25 @@ namespace BonFireAPI.Controllers
             forUpdate.DirectorName = model.Director.Name;
             forUpdate.Genres = model.Genres.Select(x => x.Genre.Name).ToList();
             forUpdate.Actors = model.Actors.Select(x => x.Actor.Name).ToList();
+        }
+
+        protected override Expression<Func<Movie, bool>> GetFilter(MovieGetRequest model)
+        {
+            model.Filter ??= new MovieGetFilterRequest();
+
+            return
+                u =>
+                    (string.IsNullOrEmpty(model.Filter.Genre) || u.Genres.Any(x => x.Genre.Name.Contains(model.Filter.Genre))) &&
+                    (string.IsNullOrEmpty(model.Filter.Title) || u.Title.Contains(model.Filter.Title)) &&
+                    (string.IsNullOrEmpty(model.Filter.Release_Date) || u.Release_Date.Contains(model.Filter.Release_Date)) &&
+                    (model.Filter.DirectorId == null || u.DirectorId == model.Filter.DirectorId) &&
+                    (model.Filter.Rating == null || u.Rating == model.Filter.Rating) &&
+                    (string.IsNullOrEmpty(model.Filter.Actor) || u.Actors.Any(x => x.Actor.Name.Contains(model.Filter.Actor)));
+        }
+
+        protected override void PopulateGetResponse(MovieGetRequest request, MovieGetResponse response)
+        {
+            response.Filter = request.Filter;
         }
 
         protected override void OnDelete(Movie entity, out string error)

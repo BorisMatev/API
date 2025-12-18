@@ -6,6 +6,7 @@ using Common.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq.Expressions;
 using System.Security.Claims;
 
 namespace BonFireAPI.Controllers
@@ -13,7 +14,7 @@ namespace BonFireAPI.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class UserController : BaseController<User, UserService, UserRequest, UserResponse>
+    public class UserController : BaseController<User, UserService, UserRequest, UserResponse,UsersGetRequest,UserGetResponse>
     {
         PhotoService photoService = new PhotoService();
         UserService service = new UserService();
@@ -37,6 +38,22 @@ namespace BonFireAPI.Controllers
             forUpdate.FavoriteMovies = model.FavoriteMovies.Select(x => x.Movie.Title).ToList();
             forUpdate.Reviews = model.Reviews.Select(x => x.Movie.Title).ToList();
         }
+
+        protected override Expression<Func<User, bool>> GetFilter(UsersGetRequest model)
+        {
+            model.Filter ??= new UserGetFilterRequest();
+
+            return
+                u =>
+                    (string.IsNullOrEmpty(model.Filter.Username) || u.Username.Contains(model.Filter.Username)) &&
+                    (string.IsNullOrEmpty(model.Filter.Email) || u.Email.Contains(model.Filter.Email)) &&
+                    (string.IsNullOrEmpty(model.Filter.Role) || u.Role.Contains(model.Filter.Role));
+        }
+
+        protected override void PopulateGetResponse(UsersGetRequest request, UserGetResponse response)
+        {
+            response.Filter = request.Filter;
+        }
         protected override void OnDelete(User entity, out string error)
         {
             error = null;
@@ -59,6 +76,27 @@ namespace BonFireAPI.Controllers
         public IActionResult Create([FromForm] UserRequest request)
         {
             return base.Create(request);
+        }
+
+        [HttpPost]
+        [Route("update-profile")]
+        public IActionResult UpdateProfile([FromForm] UserRequest request)
+        {
+            var loggedUserId = int.Parse(User.FindFirst("loggedUserId")?.Value);
+            var entity = service.GetById(loggedUserId);
+            string error;
+
+            if (entity == null)
+                return BadRequest("Not found");
+
+            PopulateEntity(entity, request, out error);
+
+            if (error != null)
+                return BadRequest(error);
+
+            service.Save(entity);
+
+            return Ok();
         }
 
 

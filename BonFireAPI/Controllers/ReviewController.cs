@@ -1,18 +1,20 @@
 ﻿using BonFireAPI.Models.RequestDTOs;
 using BonFireAPI.Models.RequestDTOs.Review;
 using BonFireAPI.Models.ResponseDTOs;
+using BonFireAPI.Models.ResponseDTOs.Review;
 using Common.Entities;
 using Common.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq.Expressions;
 
 namespace BonFireAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class ReviewController : BaseController<Review,ReviewService,ReviewRequest,ReviewResponse>
+    public class ReviewController : BaseController<Review, ReviewService, ReviewRequest, ReviewResponse, ReviewGetRequest, ReviewGetResponse>
     {
         ReviewService service = new ReviewService();
         protected override void PopulateEntity(Review forUpdate, ReviewRequest model, out string error)
@@ -45,6 +47,20 @@ namespace BonFireAPI.Controllers
             forUpdate.Id = model.Id;
             forUpdate.Rating = model.Rating;
             forUpdate.Comment = model.Comment;
+        }
+
+        protected virtual Expression<Func<Review, bool>> GetFilter(ReviewGetRequest model)
+        {
+            model.Filter ??= new ReviewGetFilterRequest();
+
+            return
+                u => (model.Filter.MovieId == null || u.MovieId == model.Filter.MovieId) &&
+                     (model.Filter.Rating == null || u.Rating == model.Filter.Rating);
+        }
+
+        protected virtual void PopulateGetResponse(ReviewGetRequest request, ReviewGetResponse response)
+        {
+            response.Filter = request.Filter;
         }
     }
 }

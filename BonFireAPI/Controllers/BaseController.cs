@@ -1,17 +1,22 @@
-﻿using Common.Entities;
+﻿using API.Infrastructure.RequestDTOs.Shared;
+using API.Infrastructure.ResponseDTOs.Shared;
+using Common.Entities;
 using Common.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq.Expressions;
 
 namespace BonFireAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BaseController<E, EService, ERequest, EResponse> : ControllerBase
+    public class BaseController<E, EService, ERequest, EResponse, EGetRequest, EGetResponse> : ControllerBase
         where E : BaseEntity, new()
         where EService : BaseService<E>, new()
         where EResponse : class, new()
         where ERequest : class
+        where EGetRequest : BaseGetRequest, new()
+        where EGetResponse : BaseGetResponse<E>, new()
     {
         EService service = new EService();
 
@@ -21,10 +26,54 @@ namespace BonFireAPI.Controllers
         protected virtual void PopulateResponseEntity(EResponse forUpdate, E model, out string error)
         { error = null; }
 
+        protected virtual Expression<Func<E, bool>> GetFilter(EGetRequest model)
+        { return null; }
+
+        protected virtual void PopulateGetResponse(EGetRequest request, EGetResponse response)
+        { }
+
         protected virtual void OnDelete(E entity, out string error)
         { error = null; }
 
         [HttpGet]
+        public IActionResult Get([FromQuery] EGetRequest model)
+        {
+            model.Pager = model.Pager ?? new PagerRequest();
+            model.Pager.Page = model.Pager.Page <= 0
+                                    ? 1
+                                    : model.Pager.Page;
+            model.Pager.PageSize = model.Pager.PageSize <= 0
+                                    ? 10
+                                    : model.Pager.PageSize;
+            model.OrderBy ??= nameof(BaseEntity.Id);
+
+            EService service = new EService();
+
+            Expression<Func<E, bool>> filter = GetFilter(model);
+
+            var response = new EGetResponse();
+
+            response.Pager = new PagerResponse();
+            response.Pager.Page = model.Pager.Page;
+            response.Pager.PageSize = model.Pager.PageSize;
+
+            response.OrderBy = model.OrderBy;
+            response.SortAsc = model.SortAsc;
+
+            PopulateGetResponse(model, response);
+
+            response.Pager.Count = service.Count(filter);
+            response.Items = service.GetAll(
+                                        filter,
+                                        model.OrderBy,
+                                        model.SortAsc,
+                                        model.Pager.Page,
+                                        model.Pager.PageSize);
+
+            return Ok(response);
+        }
+
+        /*[HttpGet]
         public IActionResult GetAll()
         {
             string error;
@@ -38,7 +87,7 @@ namespace BonFireAPI.Controllers
              }).ToList();
 
             return Ok(resp);
-        }
+        }*/
 
         [HttpGet]
         [Route("{id}")]
@@ -80,7 +129,7 @@ namespace BonFireAPI.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        public IActionResult Update([FromBody] ERequest req, [FromRoute] int id)
+        public IActionResult Update([FromForm] ERequest req, [FromRoute] int id)
         {
             var entity = service.GetById(id);
             string error;

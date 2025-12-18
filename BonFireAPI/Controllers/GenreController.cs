@@ -5,13 +5,14 @@ using Common.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq.Expressions;
 
 namespace BonFireAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles = "Admin")]
-    public class GenreController : BaseController<Genre,GenreService,GenreRequest,GenreResponse>
+    public class GenreController : BaseController<Genre,GenreService,GenreRequest,GenreResponse,GenreGetRequest,GenreGetResponse>
     {
         protected override void PopulateEntity(Genre forUpdate, GenreRequest model, out string error)
         { 
@@ -25,6 +26,19 @@ namespace BonFireAPI.Controllers
             forUpdate.Id = model.Id;
             forUpdate.Name = model.Name;
             forUpdate.Movies = model.Movies.Select(x => x.Movie.Title).ToList();
+        }
+
+        protected virtual Expression<Func<Genre, bool>> GetFilter(GenreGetRequest model)
+        {
+            model.Filter ??= new GenreGetFilterRequest();
+
+            return
+                u => (string.IsNullOrEmpty(model.Filter.Name) || u.Name.Contains(model.Filter.Name));
+        }
+
+        protected virtual void PopulateGetResponse(GenreGetRequest request, GenreGetResponse response)
+        {
+            response.Filter = request.Filter;
         }
 
     }
