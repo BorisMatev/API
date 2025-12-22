@@ -14,5 +14,6 @@ namespace BonFireAPI.Models.ResponseDTOs.Movies
 
         public List<string> Genres { get; set; }
         public List<string> Actors { get; set; }
+        public List<ReviewResponse> Reviews { get; set; }
     }
 }

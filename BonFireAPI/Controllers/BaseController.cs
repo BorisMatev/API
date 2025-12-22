@@ -73,22 +73,6 @@ namespace BonFireAPI.Controllers
             return Ok(response);
         }
 
-        /*[HttpGet]
-        public IActionResult GetAll()
-        {
-            string error;
-
-            var resp = service.GetAll().Select(x => {
-
-                EResponse item = new EResponse();
-                PopulateResponseEntity(item, x, out error);
-                return item;
-
-             }).ToList();
-
-            return Ok(resp);
-        }*/
-
         [HttpGet]
         [Route("{id}")]
         public IActionResult GetById([FromRoute] int id)

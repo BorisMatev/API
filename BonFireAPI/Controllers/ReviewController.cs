@@ -47,6 +47,7 @@ namespace BonFireAPI.Controllers
             forUpdate.Id = model.Id;
             forUpdate.Rating = model.Rating;
             forUpdate.Comment = model.Comment;
+            forUpdate.UserName = model.User.Username;
         }
 
         protected virtual Expression<Func<Review, bool>> GetFilter(ReviewGetRequest model)
