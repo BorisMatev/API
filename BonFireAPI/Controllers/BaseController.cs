@@ -2,6 +2,7 @@
 using API.Infrastructure.ResponseDTOs.Shared;
 using Common.Entities;
 using Common.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq.Expressions;
@@ -36,6 +37,7 @@ namespace BonFireAPI.Controllers
         { error = null; }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Get([FromQuery] EGetRequest model)
         {
             model.Pager = model.Pager ?? new PagerRequest();

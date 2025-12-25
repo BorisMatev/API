@@ -1,4 +1,6 @@
-﻿namespace BonFireAPI.Models.ResponseDTOs.User
+﻿using Common.Entities;
+
+namespace BonFireAPI.Models.ResponseDTOs.User
 {
     public class UserResponse
     {
@@ -9,6 +11,6 @@
         public string Role { get; set; }
 
         public virtual List<string> Reviews { get; set; }
-        public virtual List<string> FavoriteMovies { get; set; }
+        public virtual List<Movie> FavoriteMovies { get; set; }
     }
 }

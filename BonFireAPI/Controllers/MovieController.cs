@@ -7,6 +7,7 @@ using BonFireAPI.Models.RequestDTOs.Movie;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq.Expressions;
 using System.Linq;
+using BonFireAPI.Models.ResponseDTOs;
 
 namespace BonFireAPI.Controllers
 {
@@ -52,6 +53,14 @@ namespace BonFireAPI.Controllers
             forUpdate.DirectorName = model.Director.Name;
             forUpdate.Genres = model.Genres.Select(x => x.Genre.Name).ToList();
             forUpdate.Actors = model.Actors.Select(x => x.Actor.Name).ToList();
+            forUpdate.Reviews = model.Reviews.Select(x => new ReviewResponse
+            {
+                Comment = x.Comment,
+                Id = x.Id,
+                UserName = x.User.Username,
+                Rating = x.Rating,
+                UserId = x.UserId
+            }).ToList();
         }
 
         protected override Expression<Func<Movie, bool>> GetFilter(MovieGetRequest model)

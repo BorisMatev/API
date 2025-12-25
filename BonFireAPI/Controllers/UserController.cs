@@ -1,5 +1,6 @@
 ﻿using BonFireAPI.Models.RequestDTOs.User;
 using BonFireAPI.Models.ResponseDTOs;
+using BonFireAPI.Models.ResponseDTOs.Movies;
 using BonFireAPI.Models.ResponseDTOs.User;
 using Common.Entities;
 using Common.Services;
@@ -35,7 +36,7 @@ namespace BonFireAPI.Controllers
             forUpdate.Email = model.Email;
             forUpdate.Role = model.Role;
             forUpdate.Profile_Photo = model.Profile_Photo;
-            forUpdate.FavoriteMovies = model.FavoriteMovies.Select(x => x.Movie.Title).ToList();
+            forUpdate.FavoriteMovies = model.FavoriteMovies.Select(x => x.Movie).ToList();
             forUpdate.Reviews = model.Reviews.Select(x => x.Movie.Title).ToList();
         }
 
@@ -97,6 +98,49 @@ namespace BonFireAPI.Controllers
             service.Save(entity);
 
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("get-favorite")]
+        public IActionResult GetFavorite()
+        {
+            MovieService movieService = new MovieService();
+
+            var loggedUserId = int.Parse(User.FindFirst("loggedUserId")?.Value);
+
+            var user = service.GetById(loggedUserId);
+
+            if (user == null)
+            {
+                return BadRequest("Not found");
+            }
+
+            var movies = user.FavoriteMovies.Select(x => new MovieResponse
+            {
+                Id = x.Movie.Id,
+                Title = x.Movie.Title,
+                Release_Date = x.Movie.Release_Date,
+                Rating = x.Movie.Rating,
+                CoverPath = x.Movie.CoverPath,
+                Reviews = x.Movie.Reviews.Select(x => new ReviewResponse
+                {
+                    Comment = x.Comment,
+                    Id = x.Id,
+                    UserName = x.User.Username,
+                    Rating = x.Rating,
+                    UserId = x.UserId
+                }).ToList(),
+                DirectorName = x.Movie.Director.Name,
+                Genres = x.Movie.Genres.Select(x => x.Genre.Name).ToList(),
+                Actors = x.Movie.Actors.Select(x => x.Actor.Name).ToList()
+            }); ;
+
+            if (movies == null)
+            {
+                return BadRequest();
+            }
+
+            return Ok(movies);
         }
 
 
