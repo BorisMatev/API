@@ -36,8 +36,6 @@ namespace BonFireAPI.Controllers
             forUpdate.Email = model.Email;
             forUpdate.Role = model.Role;
             forUpdate.Profile_Photo = model.Profile_Photo;
-            forUpdate.FavoriteMovies = model.FavoriteMovies.Select(x => x.Movie).ToList();
-            forUpdate.Reviews = model.Reviews.Select(x => x.Movie.Title).ToList();
         }
 
         protected override Expression<Func<User, bool>> GetFilter(UsersGetRequest model)
@@ -79,21 +77,31 @@ namespace BonFireAPI.Controllers
             return base.Create(request);
         }
 
-        [HttpPost]
+        [HttpPut]
         [Route("update-profile")]
-        public IActionResult UpdateProfile([FromForm] UserRequest request)
+        public IActionResult UpdateProfile([FromForm] UserUpdateRequest request)
         {
             var loggedUserId = int.Parse(User.FindFirst("loggedUserId")?.Value);
             var entity = service.GetById(loggedUserId);
-            string error;
 
             if (entity == null)
                 return BadRequest("Not found");
 
-            PopulateEntity(entity, request, out error);
-
-            if (error != null)
-                return BadRequest(error);
+            if (request.Username != null) entity.Username = request.Username;
+            if (request.Password != null)
+            {
+                if (request.OldPassword == entity.Password)
+                {
+                    entity.Password = request.Password;
+                }
+                else
+                {
+                    return BadRequest("Incorect password " + request.OldPassword + " " + entity.Password); 
+                }
+            }
+            if (request.Email != null) entity.Email = request.Email;
+            if (request.Role != null) entity.Role = request.Role;
+            if (request.Profile_Photo != null) entity.Profile_Photo = photoService.GetPhotoName(request.Profile_Photo);
 
             service.Save(entity);
 

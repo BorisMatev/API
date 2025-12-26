@@ -3,7 +3,7 @@ using BonFireAPI.Models.RequestDTOs.User;
 
 namespace BonFireAPI.Models.ResponseDTOs.User
 {
-    public class UserGetResponse : BaseGetResponse<Common.Entities.User>
+    public class UserGetResponse : BaseGetResponse<UserResponse>
     {
         public UserGetFilterRequest Filter { get; set; }
     }

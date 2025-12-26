@@ -17,7 +17,7 @@ namespace BonFireAPI.Controllers
         where EResponse : class, new()
         where ERequest : class
         where EGetRequest : BaseGetRequest, new()
-        where EGetResponse : BaseGetResponse<E>, new()
+        where EGetResponse : BaseGetResponse<EResponse>, new()
     {
         EService service = new EService();
 
@@ -65,12 +65,21 @@ namespace BonFireAPI.Controllers
             PopulateGetResponse(model, response);
 
             response.Pager.Count = service.Count(filter);
-            response.Items = service.GetAll(
+            var entities = service.GetAll(
                                         filter,
                                         model.OrderBy,
                                         model.SortAsc,
                                         model.Pager.Page,
                                         model.Pager.PageSize);
+
+            response.Items = new List<EResponse>();
+
+            foreach (var entity in entities)
+            {
+                var resp = new EResponse();
+                PopulateResponseEntity(resp, entity, out string error);
+                response.Items.Add(resp);
+            }
 
             return Ok(response);
         }

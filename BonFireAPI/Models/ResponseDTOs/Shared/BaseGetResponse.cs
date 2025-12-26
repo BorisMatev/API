@@ -4,10 +4,9 @@ using System.Collections.Generic;
 
 namespace API.Infrastructure.ResponseDTOs.Shared;
 
-public class BaseGetResponse<E>
-    where E : BaseEntity
+public class BaseGetResponse<TResponse>
 {
-    public List<E> Items { get; set; }
+    public List<TResponse> Items { get; set; }
     public PagerResponse Pager { get; set; }
     public string OrderBy { get; set; }
     public bool SortAsc { get; set; }

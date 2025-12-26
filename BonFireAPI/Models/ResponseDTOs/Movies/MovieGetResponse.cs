@@ -4,7 +4,7 @@ using Common.Entities;
 
 namespace BonFireAPI.Models.ResponseDTOs.Movies
 {
-    public class MovieGetResponse : BaseGetResponse<Movie>
+    public class MovieGetResponse : BaseGetResponse<MovieResponse>
     {
         public MovieGetFilterRequest Filter { get; set; }
     }
