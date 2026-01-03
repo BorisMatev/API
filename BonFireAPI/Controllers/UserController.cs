@@ -26,7 +26,14 @@ namespace BonFireAPI.Controllers
             forUpdate.Username = model.Username;
             forUpdate.Password = model.Password;
             forUpdate.Profile_Photo = photoService.GetPhotoName(model.Profile_Photo);
-            forUpdate.Role = "User";
+            if (model.Role == null)
+            {
+                forUpdate.Role = "User";
+            }
+            else
+            {
+                forUpdate.Role = model.Role;
+            }
         }
         protected override void PopulateResponseEntity(UserResponse forUpdate, User model, out string error)
         {
@@ -78,11 +85,10 @@ namespace BonFireAPI.Controllers
         }
 
         [HttpPut]
-        [Route("update-profile")]
-        public IActionResult UpdateProfile([FromForm] UserUpdateRequest request)
+        [Route("update-profile/{id}")]
+        public IActionResult UpdateProfile([FromForm] UserUpdateRequest request, [FromRoute] int id)
         {
-            var loggedUserId = int.Parse(User.FindFirst("loggedUserId")?.Value);
-            var entity = service.GetById(loggedUserId);
+            var entity = service.GetById(id);
 
             if (entity == null)
                 return BadRequest("Not found");
